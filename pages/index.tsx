@@ -28,7 +28,9 @@ const Home = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Good First Issues</h1>
+      <h1 className="text-4xl font-bold mt-2 mb-8">
+        PSE - Good First Issues Tracker
+      </h1>
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -36,12 +38,18 @@ const Home = () => {
           {data.map((repo, index) => (
             <div key={index} style={{ marginBottom: "20px" }}>
               <h2>
-                <a href={repo.url} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={repo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-3xl font-bold hover:text-blue-500"
+                >
                   {repo.repo}
                 </a>
               </h2>
-              <p>Total Open Issues: {repo.totalOpenIssues}</p>
-              <p>Good First Issues: {repo.count}</p>
+              <p>
+                Good First Issues: {repo.count}/{repo.totalOpenIssues}
+              </p>
               <ul>
                 {repo.issues.map((issue, i) => (
                   <li key={i}>
@@ -49,6 +57,7 @@ const Home = () => {
                       href={issue.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="underline hover:text-blue-500"
                     >
                       #{issue.number}: {issue.title}
                     </a>
