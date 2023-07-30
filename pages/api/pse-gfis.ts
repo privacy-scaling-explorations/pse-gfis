@@ -8,6 +8,8 @@ type ResultType = {
   issues: { number: number; title: string; url: string }[];
 };
 
+type EntityType = { org: string } | { repo: { owner: string; repo: string } };
+
 let cache;
 let cacheTimestamp;
 
@@ -26,15 +28,18 @@ export default async (req, res) => {
 
   try {
     const octokit = getOctokitInstance(accessToken);
-    const entities = [
+    const entities: EntityType[] = [
       { org: "semaphore-protocol" },
-      { repo: { owner: "privacy-scaling-explorations", repo: "maci" } },
+      { org: "Unirep" },
+      { org: "Rate-Limiting-Nullifier" },
+      { org: "privacy-scaling-explorations" },
+      // { repo: { owner: "privacy-scaling-explorations", repo: "maci" } },
       // Add more orgs and repos here
     ];
     const result: ResultType[] = [];
 
     for (let entity of entities) {
-      if (entity.org) {
+      if ("org" in entity) {
         const repos = await getRepos(octokit, entity.org);
         for (let repo of repos) {
           const { count, issues, totalOpenIssues } = await processRepo(
@@ -52,7 +57,7 @@ export default async (req, res) => {
             issues,
           });
         }
-      } else if (entity.repo) {
+      } else if ("repo" in entity) {
         const { count, issues, totalOpenIssues } = await processRepo(
           octokit,
           entity.repo
