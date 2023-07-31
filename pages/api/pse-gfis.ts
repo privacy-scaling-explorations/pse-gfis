@@ -1,4 +1,4 @@
-import { getOctokitInstance, getRepos, processRepo } from "./utils";
+import { getOctokitInstance, fetchData, EntityType } from "./utils";
 
 type ResultType = {
   repo: string;
@@ -7,8 +7,6 @@ type ResultType = {
   url: string;
   issues: { number: number; title: string; url: string }[];
 };
-
-type EntityType = { org: string } | { repo: { owner: string; repo: string } };
 
 let cache;
 let cacheTimestamp;
@@ -27,53 +25,62 @@ export default async (req, res) => {
   }
 
   try {
-    const octokit = getOctokitInstance(accessToken);
+    const startTime = new Date(); // Capture the start time as a Date object
+    console.log(`API request started at ${startTime.toISOString()}`); // Log the start time
+
+    const client = getOctokitInstance(accessToken);
     const entities: EntityType[] = [
       { org: "semaphore-protocol" },
       { org: "Unirep" },
       { org: "Rate-Limiting-Nullifier" },
       { org: "privacy-scaling-explorations" },
       // { repo: { owner: "privacy-scaling-explorations", repo: "maci" } },
+      // { repo: { owner: "semaphore-protocol", repo: "semaphore" } },
       // Add more orgs and repos here
     ];
-    const result: ResultType[] = [];
+    const data = (await fetchData(client, entities)) as Record<string, any>;
 
-    for (let entity of entities) {
-      if ("org" in entity) {
-        const repos = await getRepos(octokit, entity.org);
-        for (let repo of repos) {
-          const { count, issues, totalOpenIssues } = await processRepo(
-            octokit,
-            {
-              owner: repo.owner.login,
-              repo: repo.name,
-            }
-          );
+    // Process the data to match the ResultType structure
+    const result: ResultType[] = [];
+    Object.keys(data).forEach((key) => {
+      const item = data[key];
+      if (key.startsWith("org")) {
+        item.repositories.nodes.forEach((repo) => {
           result.push({
             repo: `${repo.owner.login}/${repo.name}`,
-            count,
-            totalOpenIssues,
-            url: repo.html_url,
-            issues,
+            count: repo.goodFirstIssues.totalCount,
+            totalOpenIssues: repo.issues.totalCount,
+            url: repo.url,
+            issues: repo.goodFirstIssues.nodes.map((issue) => ({
+              number: issue.number,
+              title: issue.title,
+              url: issue.url,
+            })),
           });
-        }
-      } else if ("repo" in entity) {
-        const { count, issues, totalOpenIssues } = await processRepo(
-          octokit,
-          entity.repo
-        );
+        });
+      } else if (key.startsWith("repo")) {
         result.push({
-          repo: `${entity.repo.owner}/${entity.repo.repo}`,
-          count,
-          totalOpenIssues,
-          url: `https://github.com/${entity.repo.owner}/${entity.repo.repo}`,
-          issues,
+          repo: `${item.owner.login}/${item.name}`,
+          count: item.goodFirstIssues.totalCount,
+          totalOpenIssues: item.issues.totalCount,
+          url: item.url,
+          issues: item.goodFirstIssues.nodes.map((issue) => ({
+            number: issue.number,
+            title: issue.title,
+            url: issue.url,
+          })),
         });
       }
-    }
+    });
 
     cache = result; // Store the result in the cache
     cacheTimestamp = currentTime; // Update the timestamp
+
+    const endTime = Date.now(); // Capture the end time
+    const timeTaken = endTime - startTime.getTime(); // Calculate the time taken
+
+    console.log(`API request took ${timeTaken} milliseconds`); // Log the time taken
+
     res.status(200).json(result);
   } catch (error) {
     console.error(error);

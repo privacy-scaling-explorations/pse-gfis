@@ -1,34 +1,83 @@
-import { Octokit } from "octokit";
+import { GraphQLClient } from "graphql-request";
 
-type Repo = { owner: string; repo: string };
+const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
 
-export const getOctokitInstance = (token: string) =>
-  new Octokit({ auth: token });
-
-export const getRepos = async (octokit: Octokit, org: string) => {
-  const { data } = await octokit.request("GET /orgs/{org}/repos", { org });
-  return data;
+export const getOctokitInstance = (accessToken: string) => {
+  return new GraphQLClient(GITHUB_GRAPHQL_ENDPOINT, {
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+  });
 };
 
-export const processRepo = async (octokit: Octokit, repo: Repo) => {
-  const { data: issues } = await octokit.request(
-    "GET /repos/{owner}/{repo}/issues",
-    repo
-  );
-  const totalOpenIssues = issues.length;
-  const goodFirstIssues = issues.filter((issue) =>
-    issue.labels.some(
-      (label) =>
-        typeof label === "object" &&
-        ["good first issue", "good-first-issue", "good first issues"].includes(
-          label.name?.toLowerCase() || ""
-        )
-    )
-  );
-  const details = goodFirstIssues.map((issue) => ({
-    number: issue.number,
-    title: issue.title,
-    url: issue.html_url,
-  }));
-  return { count: goodFirstIssues.length, issues: details, totalOpenIssues };
+export type EntityType =
+  | { org: string }
+  | { repo: { owner: string; repo: string } };
+
+export const fetchData = async (
+  client: GraphQLClient,
+  entities: EntityType[]
+) => {
+  let query = "";
+  const variables = {};
+
+  entities.forEach((entity, index) => {
+    if ("org" in entity) {
+      query += `
+        org${index}: organization(login: $org${index}) {
+          repositories(first: 100) {
+            nodes {
+              name
+              owner {
+                login
+              }
+              url
+              issues(states: OPEN, first: 100) {
+                totalCount
+              }
+              goodFirstIssues: issues(states: OPEN, first: 100, labels: ["good first issue", "good-first-issue", "good first issues"]) {
+                totalCount
+                nodes {
+                  number
+                  title
+                  url
+                }
+              }
+            }
+          }
+        }
+      `;
+      variables[`org${index}`] = entity.org;
+    } else if ("repo" in entity) {
+      query += `
+        repo${index}: repository(owner: $owner${index}, name: $repo${index}) {
+          name
+          owner {
+            login
+          }
+          url
+          issues(states: OPEN, first: 100) {
+            totalCount
+          }
+          goodFirstIssues: issues(states: OPEN, first: 100, labels: ["good first issue", "good-first-issue", "good first issues"]) {
+            totalCount
+            nodes {
+              number
+              title
+              url
+            }
+          }
+        }
+      `;
+      variables[`owner${index}`] = entity.repo.owner;
+      variables[`repo${index}`] = entity.repo.repo;
+    }
+  });
+
+  query = `query (${Object.keys(variables)
+    .map((key) => `$${key}: String!`)
+    .join(", ")}) { ${query} }`;
+
+  const data = await client.request(query, variables);
+  return data;
 };
