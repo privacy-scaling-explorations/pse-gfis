@@ -2,6 +2,55 @@ import { GraphQLClient } from "graphql-request";
 
 const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
 
+const GOOD_FIRST_ISSUE_LABELS = [
+  "good first issue",
+  "good-first-issue",
+  "good first issues",
+  // Add more labels here
+];
+
+const buildIssuesFragment = () => `
+  issues(states: OPEN, first: 100) {
+    totalCount
+  }
+  goodFirstIssues: issues(states: OPEN, first: 100, labels: [${GOOD_FIRST_ISSUE_LABELS.map(
+    (label) => `"${label}"`
+  ).join(", ")}]) {
+    totalCount
+    nodes {
+      number
+      title
+      url
+    }
+  }
+`;
+
+const buildOrgQuery = (index: number) => `
+  org${index}: organization(login: $org${index}) {
+    repositories(first: 100) {
+      nodes {
+        name
+        owner {
+          login
+        }
+        url
+        ${buildIssuesFragment()}
+      }
+    }
+  }
+`;
+
+const buildRepoQuery = (index: number) => `
+  repo${index}: repository(owner: $owner${index}, name: $repo${index}) {
+    name
+    owner {
+      login
+    }
+    url
+    ${buildIssuesFragment()}
+  }
+`;
+
 export const getOctokitInstance = (accessToken: string) => {
   return new GraphQLClient(GITHUB_GRAPHQL_ENDPOINT, {
     headers: {
@@ -23,52 +72,10 @@ export const fetchData = async (
 
   entities.forEach((entity, index) => {
     if ("org" in entity) {
-      query += `
-        org${index}: organization(login: $org${index}) {
-          repositories(first: 100) {
-            nodes {
-              name
-              owner {
-                login
-              }
-              url
-              issues(states: OPEN, first: 100) {
-                totalCount
-              }
-              goodFirstIssues: issues(states: OPEN, first: 100, labels: ["good first issue", "good-first-issue", "good first issues"]) {
-                totalCount
-                nodes {
-                  number
-                  title
-                  url
-                }
-              }
-            }
-          }
-        }
-      `;
+      query += buildOrgQuery(index);
       variables[`org${index}`] = entity.org;
     } else if ("repo" in entity) {
-      query += `
-        repo${index}: repository(owner: $owner${index}, name: $repo${index}) {
-          name
-          owner {
-            login
-          }
-          url
-          issues(states: OPEN, first: 100) {
-            totalCount
-          }
-          goodFirstIssues: issues(states: OPEN, first: 100, labels: ["good first issue", "good-first-issue", "good first issues"]) {
-            totalCount
-            nodes {
-              number
-              title
-              url
-            }
-          }
-        }
-      `;
+      query += buildRepoQuery(index);
       variables[`owner${index}`] = entity.repo.owner;
       variables[`repo${index}`] = entity.repo.repo;
     }
