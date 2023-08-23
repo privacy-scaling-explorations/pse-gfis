@@ -27,7 +27,7 @@ const buildIssuesFragment = () => `
 
 const buildOrgQuery = (index: number) => `
   org${index}: organization(login: $org${index}) {
-    repositories(first: 100) {
+    repositories(first: 100, isArchived: false) {
       nodes {
         name
         owner {
