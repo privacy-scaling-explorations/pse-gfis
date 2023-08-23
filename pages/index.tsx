@@ -44,12 +44,9 @@ const Home = () => {
                   rel="noopener noreferrer"
                   className="text-3xl font-bold hover:text-blue-500"
                 >
-                  {repo.repo}
+                  {repo.repo} ({repo.count}/{repo.totalOpenIssues})
                 </a>
               </h2>
-              <p>
-                Good First Issues: {repo.count}/{repo.totalOpenIssues}
-              </p>
               <ul>
                 {repo.issues.map((issue, i) => (
                   <li key={i}>
