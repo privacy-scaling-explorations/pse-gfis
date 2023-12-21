@@ -11,6 +11,7 @@ type RepoData = {
 const Home = () => {
   const [data, setData] = useState<RepoData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [hideZero, setHideZero] = useState(true);
 
   useEffect(() => {
@@ -18,11 +19,15 @@ const Home = () => {
     fetch("/api/pse-gfis")
       .then((response) => response.json())
       .then((result) => {
+        if (result.error) {
+          throw new Error(result.error);
+        }
         setData(result);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
+        setError(true);
         setLoading(false);
       });
   }, []);
@@ -30,6 +35,10 @@ const Home = () => {
   const handleHideZeroChange = (event) => {
     setHideZero(event.target.checked);
   };
+
+  if (error) {
+    return <p>There was an error loading the data. Check the console.</p>;
+  }
 
   return (
     <div style={{ padding: "20px" }}>
