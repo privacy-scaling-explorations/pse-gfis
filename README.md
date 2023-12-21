@@ -1,6 +1,6 @@
 # PSE Good First Issues Tracker
 
-https://pse-good-first-issues.vercel.app/
+Note: Due to current issues with Github permissions, a mirror (may not be most up-to-date) is hosted here: https://pse-good-first-issues.vercel.app/
 
 This is a simple frontend/backend to grab all the "good first issues" from a number of Github orgs/repos.
 
