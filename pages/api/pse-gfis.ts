@@ -1,11 +1,19 @@
 import { getOctokitInstance, fetchData, EntityType } from "./utils";
 
 type ResultType = {
-  repo: string;
+  name: string;
+  owner: string;
+  avatarUrl: string;
   count: number;
   totalOpenIssues: number;
   url: string;
-  issues: { number: number; title: string; url: string }[];
+  issues: {
+    number: number;
+    title: string;
+    url: string;
+    author: string;
+    createdAt: string;
+  }[];
 };
 
 let cache;
@@ -46,8 +54,13 @@ export default async (req, res) => {
       const item = data[key];
       if (key.startsWith("org")) {
         item.repositories.nodes.forEach((repo) => {
+          if (repo.goodFirstIssues.totalCount != 0) {
+            console.log(repo.goodFirstIssues.nodes);
+          }
           result.push({
-            repo: `${repo.owner.login}/${repo.name}`,
+            owner: repo.owner.login,
+            name: repo.name,
+            avatarUrl: repo.owner.avatarUrl,
             count: repo.goodFirstIssues.totalCount,
             totalOpenIssues: repo.issues.totalCount,
             url: repo.url,
@@ -55,12 +68,16 @@ export default async (req, res) => {
               number: issue.number,
               title: issue.title,
               url: issue.url,
+              author: issue.author.login,
+              createdAt: issue.createdAt,
             })),
           });
         });
       } else if (key.startsWith("repo")) {
         result.push({
-          repo: `${item.owner.login}/${item.name}`,
+          name: item.name,
+          owner: item.owner.login,
+          avatarUrl: item.owner.avatarUrl,
           count: item.goodFirstIssues.totalCount,
           totalOpenIssues: item.issues.totalCount,
           url: item.url,
@@ -68,6 +85,8 @@ export default async (req, res) => {
             number: issue.number,
             title: issue.title,
             url: issue.url,
+            author: issue.author.login,
+            createdAt: issue.createdAt,
           })),
         });
       }

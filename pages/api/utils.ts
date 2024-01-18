@@ -21,6 +21,10 @@ const buildIssuesFragment = () => `
       number
       title
       url
+      createdAt
+      author {
+        login
+      }
     }
   }
 `;
@@ -32,6 +36,7 @@ const buildOrgQuery = (index: number) => `
         name
         owner {
           login
+          avatarUrl
         }
         url
         ${buildIssuesFragment()}
@@ -85,6 +90,7 @@ export const fetchData = async (
     .map((key) => `$${key}: String!`)
     .join(", ")}) { ${query} }`;
 
+  console.log(query);
   const data = await client.request(query, variables);
   return data;
 };
