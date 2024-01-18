@@ -13,25 +13,30 @@ const buildIssuesFragment = () => `
   issues(states: OPEN, first: 100) {
     totalCount
   }
-  goodFirstIssues: issues(states: OPEN, first: 100, labels: [${GOOD_FIRST_ISSUE_LABELS.map(
-    (label) => `"${label}"`
-  ).join(", ")}]) {
+goodFirstIssues: issues(states: OPEN, first: 5, orderBy: {field: CREATED_AT, direction: DESC} labels: [${GOOD_FIRST_ISSUE_LABELS.map(
+  (label) => `"${label}"`
+).join(", ")}]) {
     totalCount
     nodes {
       number
       title
       url
+      createdAt
+      author {
+        login
+      }
     }
   }
 `;
 
 const buildOrgQuery = (index: number) => `
   org${index}: organization(login: $org${index}) {
-    repositories(first: 100, isArchived: false) {
+    repositories(first: 100, isArchived: false, orderBy: {field: UPDATED_AT, direction: DESC}) {
       nodes {
         name
         owner {
           login
+          avatarUrl
         }
         url
         ${buildIssuesFragment()}
@@ -41,7 +46,7 @@ const buildOrgQuery = (index: number) => `
 `;
 
 const buildRepoQuery = (index: number) => `
-  repo${index}: repository(owner: $owner${index}, name: $repo${index}) {
+  repo${index}: repository(owner: $owner${index}, name: $repo${index}, orderBy: {field: UPDATED_AT, direction: DESC}) {
     name
     owner {
       login
@@ -85,6 +90,7 @@ export const fetchData = async (
     .map((key) => `$${key}: String!`)
     .join(", ")}) { ${query} }`;
 
+  console.log(query);
   const data = await client.request(query, variables);
   return data;
 };
