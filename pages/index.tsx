@@ -38,7 +38,6 @@ const Home = () => {
   const [data, setData] = useState<RepoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [hideZero, setHideZero] = useState(true);
 
   useEffect(() => {
     // Fetch data from the API endpoint
@@ -58,10 +57,6 @@ const Home = () => {
       });
   }, []);
 
-  const handleHideZeroChange = (event) => {
-    setHideZero(event.target.checked);
-  };
-
   if (error) {
     return <p>There was an error loading the data. Check the console.</p>;
   }
@@ -77,23 +72,12 @@ const Home = () => {
           <h2 className="text-2xl text-[#848D97]">Good First Issues Tracker</h2>
         </div>
       </div>
-      <div>
-        <label>
-          Hide repos with no good first issues
-          <input
-            type="checkbox"
-            checked={hideZero}
-            onChange={handleHideZeroChange}
-            style={{ marginLeft: "0.5rem" }}
-          />
-        </label>
-      </div>
       {loading ? (
         <p>Loading...</p>
       ) : (
         <div>
           {data.map((repo, index) => {
-            if (hideZero && repo.count === 0) {
+            if (repo.count === 0) {
               return null;
             }
             return (
