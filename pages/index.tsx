@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
+import pseLogo from "../public/pse-logo.png";
+
 type RepoData = {
   name: string;
   owner: string;
@@ -66,9 +68,15 @@ const Home = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1 className="text-4xl font-bold mt-2 mb-8">
-        PSE - Good First Issues Tracker
-      </h1>
+      <div className="flex mb-6 mt-2">
+        <Image width={100} height={100} src={pseLogo} alt="Logo" />
+        <div className="ml-4">
+          <h1 className="text-4xl font-bold mt-2 mb-2">
+            Privacy & Scaling Explorations
+          </h1>
+          <h2 className="text-2xl text-[#848D97]">Good First Issues Tracker</h2>
+        </div>
+      </div>
       <div>
         <label>
           Hide repos with no good first issues
@@ -90,21 +98,21 @@ const Home = () => {
             }
             return (
               <div key={index} style={{ marginBottom: "20px" }}>
-                <h2 className="flex align-center mt-4">
+                <h2 className="mt-4">
                   <Image
-                    width={24}
-                    height={24}
+                    width={30}
+                    height={30}
                     src={repo.avatarUrl}
                     alt="profile"
-                    className="rounded-md w-6 h-6 mr-2"
+                    className="rounded-md inline mr-2 mb-1 border-white/[0.1] border-2"
                   />
                   <a
                     href={repo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xl font-semibold"
+                    className="text-2xl font-semibold"
                   >
-                    {repo.owner} / {repo.name}
+                    {repo.name}
                   </a>
                 </h2>
                 <ul>
