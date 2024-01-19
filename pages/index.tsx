@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
+import RepoPreview from "../components/RepoPreview";
+import IssuePreview from "../components/IssuePreview";
 import pseLogo from "../public/pse-logo.png";
 
 type RepoData = {
@@ -18,21 +20,6 @@ type RepoData = {
     createdAt: string;
   }[];
 };
-
-const IssueIcon = () => (
-  <svg
-    className="my-1"
-    fill="rgb(63, 185, 80)"
-    viewBox="0 0 16 16"
-    version="1.1"
-    width="16"
-    height="16"
-    aria-hidden="true"
-  >
-    <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path>
-    <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path>
-  </svg>
-);
 
 const Home = () => {
   const [data, setData] = useState<RepoData[]>([]);
@@ -62,7 +49,7 @@ const Home = () => {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="p-6">
       <div className="flex mb-6 mt-2">
         <Image width={100} height={100} src={pseLogo} alt="Logo" />
         <div className="ml-4">
@@ -81,43 +68,12 @@ const Home = () => {
               return null;
             }
             return (
-              <div key={index} style={{ marginBottom: "20px" }}>
-                <h2 className="mt-4">
-                  <Image
-                    width={30}
-                    height={30}
-                    src={repo.avatarUrl}
-                    alt="profile"
-                    className="rounded-md inline mr-2 mb-1 border-white/[0.1] border-2"
-                  />
-                  <a
-                    href={repo.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-2xl font-semibold"
-                  >
-                    {repo.name}
-                  </a>
-                </h2>
-                <ul>
+              <div key={index} className="pb-4">
+                <RepoPreview repo={repo} />
+                <ul className="pt-2">
                   {repo.issues.map((issue, i) => (
                     <li key={i} className="flex my-3">
-                      <IssueIcon />
-                      <div className="ml-2">
-                        <a
-                          href={issue.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-semibold text-base"
-                        >
-                          {issue.title}
-                        </a>
-                        <p className="text-xs text-[#848D97] mt-1">
-                          #{issue.number} opened on{" "}
-                          {new Date(issue.createdAt).toDateString()} by{" "}
-                          {issue.author}
-                        </p>
-                      </div>
+                      <IssuePreview issue={issue} />
                     </li>
                   ))}
                 </ul>

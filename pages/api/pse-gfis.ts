@@ -1,3 +1,5 @@
+import { NextApiRequest, NextApiResponse } from "next";
+
 import { getOctokitInstance, fetchData, EntityType } from "./utils";
 
 type ResultType = {
@@ -19,7 +21,7 @@ type ResultType = {
 let cache;
 let cacheTimestamp;
 
-export default async (req, res) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   const currentTime = Date.now();
 
   // Check if the cache exists and is less than an hour old

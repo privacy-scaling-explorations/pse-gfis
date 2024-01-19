@@ -1,4 +1,6 @@
 import { GraphQLClient } from "graphql-request";
+import edgeChromium from "chrome-aws-lambda";
+import puppeteer from "puppeteer-core";
 
 const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
 
@@ -93,4 +95,27 @@ export const fetchData = async (
   console.log(query);
   const data = await client.request(query, variables);
   return data;
+};
+
+export const renderPng = async (html: string) => {
+  const executablePath =
+    (await edgeChromium.executablePath) || process.env.LOCAL_CHROMIUM_PATH;
+
+  const browser = await puppeteer.launch({
+    executablePath,
+    args: edgeChromium.args,
+    headless: false,
+  });
+  const page = await browser.newPage();
+  await page.setViewport({
+    width: 400,
+    height: 70,
+    deviceScaleFactor: 2,
+  });
+  await page.setContent(html);
+  const screenshot = await page.screenshot({
+    omitBackground: true,
+  });
+  await browser.close();
+  return screenshot;
 };
