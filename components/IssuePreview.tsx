@@ -19,8 +19,7 @@ const IssuePreview = (props: IssuePreviewProps) => {
       }}
     >
       <svg
-        style={{ marginTop: "0.25rem" }}
-        fill="rgb(63, 185, 80)"
+        className="dark:fill-[#3fba4f] fill-[#197f36] mt-1"
         viewBox="0 0 16 16"
         version="1.1"
         width="16"
@@ -32,26 +31,14 @@ const IssuePreview = (props: IssuePreviewProps) => {
       </svg>
       <div style={{ marginLeft: "0.5rem" }}>
         <a
+          className="font-semibold text-base no-underline"
           href={issue.url}
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            fontSize: "1rem",
-            fontWeight: 600,
-            color: "#FFFFFF",
-            textDecoration: "none",
-          }}
         >
           {issue.title}
         </a>
-        <p
-          style={{
-            fontSize: "0.75rem",
-            fontWeight: 400,
-            marginTop: "0.25rem",
-            color: "#848D97",
-          }}
-        >
+        <p className="text-xs font-normal mt-1 dark:text-[#848D97] text-[#646c75]">
           #{issue.number} opened on {new Date(issue.createdAt).toDateString()}{" "}
           by {issue.author}
         </p>

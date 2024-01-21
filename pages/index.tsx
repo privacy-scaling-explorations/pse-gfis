@@ -50,13 +50,21 @@ const Home = () => {
 
   return (
     <div className="p-6">
-      <div className="flex mb-6 mt-2">
-        <Image width={100} height={100} src={pseLogo} alt="Logo" />
+      <div className="flex mb-6 mt-2 items-center">
+        <Image
+          width={100}
+          height={100}
+          src={pseLogo}
+          alt="Logo"
+          className="max-md:w-24 max-md:h-24"
+        />
         <div className="ml-4">
-          <h1 className="text-4xl font-bold mt-2 mb-2">
+          <h1 className="text-4xl max-md:text-2xl font-bold mt-2 mb-2">
             Privacy & Scaling Explorations
           </h1>
-          <h2 className="text-2xl text-[#848D97]">Good First Issues Tracker</h2>
+          <h2 className="text-2xl max-md:text-lg text-[#848D97]">
+            Good First Issues Tracker
+          </h2>
         </div>
       </div>
       {loading ? (

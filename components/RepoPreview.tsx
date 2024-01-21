@@ -21,25 +21,13 @@ const RepoPreview = (props: RepoPreviewProps) => {
         height={30}
         src={repo.avatarUrl}
         alt="profile"
-        style={{
-          borderRadius: "6px",
-          marginRight: "0.5rem",
-          display: "inline",
-          border: "2px solid #ffffff0F",
-        }}
+        className="rounded-[6px] mr-[0.5rem] inline border-[2px] border-[#ffffff0F]"
       />
       <a
         href={repo.url}
         target="_blank"
         rel="noopener noreferrer"
-        style={{
-          fontSize: "1.5rem",
-          lineHeight: "1.75rem",
-          fontWeight: 600,
-          color: "#ffffff",
-          textDecoration: "none",
-          padding: 0,
-        }}
+        className="text-bold no-underline text-2xl"
       >
         {repo.name}
       </a>

@@ -10,6 +10,10 @@ Starting from a list of orgs/repos, we use GraphQL to query the Github endpoint 
 <br/>
 <br/>
 
-[![Repo1](https://pse-gfis.vercel.app/api/repo-preview)](https://pse-gfis.vercel.app/)  
-[![Repo1](https://pse-gfis.vercel.app/api/issue-preview)](https://pse-gfis.vercel.app/)  
-[![Repo1](https://pse-gfis.vercel.app/api/issue-preview)](https://pse-gfis.vercel.app/)
+[![Repo1](https://pse-gfis.vercel.app/api/repo-preview#gh-dark-mode-only)](https://pse-gfis.vercel.app/#gh-dark-mode-only)  
+[![Repo1](https://pse-gfis.vercel.app/api/issue-preview#gh-dark-mode-only)](https://pse-gfis.vercel.app/#gh-dark-mode-only)  
+[![Repo1](https://pse-gfis.vercel.app/api/issue-preview#gh-dark-mode-only)](https://pse-gfis.vercel.app/#gh-dark-mode-only)
+
+[![Repo1](https://pse-gfis.vercel.app/api/repo-preview?lightMode=true#gh-light-mode-only)](https://pse-gfis.vercel.app/#gh-light-mode-only)  
+[![Repo1](https://pse-gfis.vercel.app/api/issue-preview?lightMode=true#gh-light-mode-only)](https://pse-gfis.vercel.app/#gh-light-mode-only)  
+[![Repo1](https://pse-gfis.vercel.app/api/issue-preview?lightMode=true#gh-light-mode-only)](https://pse-gfis.vercel.app/#gh-light-mode-only)
