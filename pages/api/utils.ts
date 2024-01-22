@@ -1,6 +1,6 @@
 import { GraphQLClient } from "graphql-request";
-import edgeChromium from "chrome-aws-lambda";
-import puppeteer from "puppeteer-core";
+
+import { Entity, RepoData } from "./types";
 
 const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
 
@@ -15,7 +15,7 @@ const buildIssuesFragment = () => `
   issues(states: OPEN, first: 100) {
     totalCount
   }
-goodFirstIssues: issues(states: OPEN, first: 5, orderBy: {field: CREATED_AT, direction: DESC} labels: [${GOOD_FIRST_ISSUE_LABELS.map(
+goodFirstIssues: issues(states: OPEN, first: 10, orderBy: {field: CREATED_AT, direction: DESC} labels: [${GOOD_FIRST_ISSUE_LABELS.map(
   (label) => `"${label}"`
 ).join(", ")}]) {
     totalCount
@@ -33,7 +33,7 @@ goodFirstIssues: issues(states: OPEN, first: 5, orderBy: {field: CREATED_AT, dir
 
 const buildOrgQuery = (index: number) => `
   org${index}: organization(login: $org${index}) {
-    repositories(first: 100, isArchived: false, orderBy: {field: UPDATED_AT, direction: DESC}) {
+    repositories(first: 10, isArchived: false, orderBy: {field: UPDATED_AT, direction: DESC}) {
       nodes {
         name
         owner {
@@ -58,6 +58,8 @@ const buildRepoQuery = (index: number) => `
   }
 `;
 
+export const emptySvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0"></svg>`;
+
 export const getOctokitInstance = (accessToken: string) => {
   return new GraphQLClient(GITHUB_GRAPHQL_ENDPOINT, {
     headers: {
@@ -66,14 +68,10 @@ export const getOctokitInstance = (accessToken: string) => {
   });
 };
 
-export type EntityType =
-  | { org: string }
-  | { repo: { owner: string; repo: string } };
-
 export const fetchData = async (
   client: GraphQLClient,
-  entities: EntityType[]
-) => {
+  entities: Entity[]
+): Promise<RepoData[]> => {
   let query = "";
   const variables = {};
 
@@ -92,30 +90,51 @@ export const fetchData = async (
     .map((key) => `$${key}: String!`)
     .join(", ")}) { ${query} }`;
 
-  console.log(query);
-  const data = await client.request(query, variables);
-  return data;
-};
+  const data = (await client.request(query, variables)) as any;
+  const result: RepoData[] = [];
 
-export const renderPng = async (html: string) => {
-  const executablePath =
-    (await edgeChromium.executablePath) || process.env.LOCAL_CHROMIUM_PATH;
+  Object.keys(data).forEach((key) => {
+    const item = data[key];
+    if (key.startsWith("org")) {
+      item.repositories.nodes.forEach((repo: any) => {
+        if (repo.goodFirstIssues.totalCount != 0) {
+          result.push({
+            owner: repo.owner.login,
+            name: repo.name,
+            avatarUrl: repo.owner.avatarUrl,
+            count: repo.goodFirstIssues.totalCount,
+            totalOpenIssues: repo.issues.totalCount,
+            url: repo.url,
+            issues: repo.goodFirstIssues.nodes.map((issue: any) => ({
+              number: issue.number,
+              title: issue.title,
+              url: issue.url,
+              author: issue.author.login,
+              createdAt: issue.createdAt,
+            })),
+          });
+        }
+      });
+    } else if (key.startsWith("repo")) {
+      if (item.goodFirstIssues.totalCount != 0) {
+        result.push({
+          name: item.name,
+          owner: item.owner.login,
+          avatarUrl: item.owner.avatarUrl,
+          count: item.goodFirstIssues.totalCount,
+          totalOpenIssues: item.issues.totalCount,
+          url: item.url,
+          issues: item.goodFirstIssues.nodes.map((issue: any) => ({
+            number: issue.number,
+            title: issue.title,
+            url: issue.url,
+            author: issue.author.login,
+            createdAt: issue.createdAt,
+          })),
+        });
+      }
+    }
+  });
 
-  const browser = await puppeteer.launch({
-    executablePath,
-    args: edgeChromium.args,
-    headless: false,
-  });
-  const page = await browser.newPage();
-  await page.setViewport({
-    width: 400,
-    height: 70,
-    deviceScaleFactor: 2,
-  });
-  await page.setContent(html);
-  const screenshot = await page.screenshot({
-    omitBackground: true,
-  });
-  await browser.close();
-  return screenshot;
+  return result;
 };
