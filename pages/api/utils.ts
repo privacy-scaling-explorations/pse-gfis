@@ -15,7 +15,7 @@ const buildIssuesFragment = () => `
   issues(states: OPEN, first: 100) {
     totalCount
   }
-goodFirstIssues: issues(states: OPEN, first: 10, orderBy: {field: CREATED_AT, direction: DESC} labels: [${GOOD_FIRST_ISSUE_LABELS.map(
+goodFirstIssues: issues(states: OPEN, first: 100, orderBy: {field: CREATED_AT, direction: DESC} labels: [${GOOD_FIRST_ISSUE_LABELS.map(
   (label) => `"${label}"`
 ).join(", ")}]) {
     totalCount
@@ -33,7 +33,7 @@ goodFirstIssues: issues(states: OPEN, first: 10, orderBy: {field: CREATED_AT, di
 
 const buildOrgQuery = (index: number) => `
   org${index}: organization(login: $org${index}) {
-    repositories(first: 10, isArchived: false, orderBy: {field: UPDATED_AT, direction: DESC}) {
+    repositories(first: 100, isArchived: false, orderBy: {field: UPDATED_AT, direction: DESC}) {
       nodes {
         name
         owner {

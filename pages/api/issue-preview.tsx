@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { IssueData, RepoData } from "./types";
-import { fetchGfisData } from "./pse-gfis";
-import { emptySvg } from "./utils";
+import { cachePreviewData, cachedPreviewData } from "./cache-previews";
+import { MAX_NUM_PREVIEWS } from "./constants";
 
-const renderIssuePreview = (
+export const renderIssuePreview = (
   darkMode: boolean,
   repo: RepoData,
   issue: IssueData,
@@ -77,38 +77,40 @@ const renderIssuePreview = (
 `;
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  fetchGfisData()
-    .then((data) => {
-      let issueIndex = Number(req.query.issueIndex ?? 0) % 2;
-      let repoIndex = (Number(req.query.issueIndex ?? 0) - issueIndex) / 2;
-
-      let repoData = data?.[repoIndex];
-      let issueData = repoData?.issues[issueIndex];
-
-      while (!issueData && repoIndex < data.length) {
-        repoIndex++;
-        repoData = data?.[repoIndex];
-        issueData = repoData?.issues[issueIndex];
-      }
-
-      res
-        .status(200)
-        .setHeader("Content-Type", "image/svg+xml")
-        .send(
-          repoData && issueData
-            ? renderIssuePreview(
-                !req.query.lightMode,
-                repoData,
-                issueData,
-                issueIndex === 0
-              )
-            : emptySvg
-        );
-    })
-    .catch((err) => {
-      res.status(500).json({
-        error: "An error occurred while processing the request.",
-        err,
-      });
+  if (req.query.issueIndex === undefined) {
+    return res.status(400).json({
+      error: "issueIndex is required.",
     });
+  }
+
+  if (Number(req.query.issueIndex) > MAX_NUM_PREVIEWS - 1) {
+    return res.status(400).json({
+      error:
+        "issueIndex is out of bounds. Max value is " + (MAX_NUM_PREVIEWS - 1),
+    });
+  }
+
+  if (cachedPreviewData === undefined) {
+    await cachePreviewData();
+  }
+
+  try {
+    const data = cachedPreviewData[Number(req.query.issueIndex) || 0];
+    res
+      .status(200)
+      .setHeader("Content-Type", "image/svg+xml")
+      .send(
+        renderIssuePreview(
+          !req.query.lightMode,
+          data.repo,
+          data.issue,
+          data.includeHeader
+        )
+      );
+  } catch (err) {
+    res.status(500).json({
+      error: "An error occurred while processing the request.",
+      err,
+    });
+  }
 };

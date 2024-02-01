@@ -19,3 +19,9 @@ export type RepoData = {
   url: string;
   issues: IssueData[];
 };
+
+export type PreviewData = {
+  repo: RepoData;
+  issue: IssueData;
+  includeHeader: boolean;
+};
