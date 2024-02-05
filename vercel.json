@@ -1,7 +1,13 @@
 {
   "functions": {
     "pages/api/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 10
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cache-previews",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }

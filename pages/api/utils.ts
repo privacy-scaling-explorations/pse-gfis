@@ -1,5 +1,7 @@
 import { GraphQLClient } from "graphql-request";
 
+import { Entity, RepoData } from "./types";
+
 const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
 
 const GOOD_FIRST_ISSUE_LABELS = [
@@ -13,7 +15,7 @@ const buildIssuesFragment = () => `
   issues(states: OPEN, first: 100) {
     totalCount
   }
-goodFirstIssues: issues(states: OPEN, first: 5, orderBy: {field: CREATED_AT, direction: DESC} labels: [${GOOD_FIRST_ISSUE_LABELS.map(
+goodFirstIssues: issues(states: OPEN, first: 100, orderBy: {field: CREATED_AT, direction: DESC} labels: [${GOOD_FIRST_ISSUE_LABELS.map(
   (label) => `"${label}"`
 ).join(", ")}]) {
     totalCount
@@ -56,6 +58,8 @@ const buildRepoQuery = (index: number) => `
   }
 `;
 
+export const emptySvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0"></svg>`;
+
 export const getOctokitInstance = (accessToken: string) => {
   return new GraphQLClient(GITHUB_GRAPHQL_ENDPOINT, {
     headers: {
@@ -64,14 +68,10 @@ export const getOctokitInstance = (accessToken: string) => {
   });
 };
 
-export type EntityType =
-  | { org: string }
-  | { repo: { owner: string; repo: string } };
-
 export const fetchData = async (
   client: GraphQLClient,
-  entities: EntityType[]
-) => {
+  entities: Entity[]
+): Promise<RepoData[]> => {
   let query = "";
   const variables = {};
 
@@ -90,7 +90,51 @@ export const fetchData = async (
     .map((key) => `$${key}: String!`)
     .join(", ")}) { ${query} }`;
 
-  console.log(query);
-  const data = await client.request(query, variables);
-  return data;
+  const data = (await client.request(query, variables)) as any;
+  const result: RepoData[] = [];
+
+  Object.keys(data).forEach((key) => {
+    const item = data[key];
+    if (key.startsWith("org")) {
+      item.repositories.nodes.forEach((repo: any) => {
+        if (repo.goodFirstIssues.totalCount != 0) {
+          result.push({
+            owner: repo.owner.login,
+            name: repo.name,
+            avatarUrl: repo.owner.avatarUrl,
+            count: repo.goodFirstIssues.totalCount,
+            totalOpenIssues: repo.issues.totalCount,
+            url: repo.url,
+            issues: repo.goodFirstIssues.nodes.map((issue: any) => ({
+              number: issue.number,
+              title: issue.title,
+              url: issue.url,
+              author: issue.author.login,
+              createdAt: issue.createdAt,
+            })),
+          });
+        }
+      });
+    } else if (key.startsWith("repo")) {
+      if (item.goodFirstIssues.totalCount != 0) {
+        result.push({
+          name: item.name,
+          owner: item.owner.login,
+          avatarUrl: item.owner.avatarUrl,
+          count: item.goodFirstIssues.totalCount,
+          totalOpenIssues: item.issues.totalCount,
+          url: item.url,
+          issues: item.goodFirstIssues.nodes.map((issue: any) => ({
+            number: issue.number,
+            title: issue.title,
+            url: issue.url,
+            author: issue.author.login,
+            createdAt: issue.createdAt,
+          })),
+        });
+      }
+    }
+  });
+
+  return result;
 };
