@@ -14,12 +14,10 @@ export const renderIssuePreview = (
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         role="img"
-        viewBox="0 0 ${showRepoName ? "600" : "400"} ${
-  showRepoName ? "85" : "50"
-}"
+        viewBox="0 0 600 65"
         version="1.1"
-        width="${showRepoName ? "600" : "400"}"
-        height="${showRepoName ? "85" : "50"}"
+        width="600"
+        height="65"
         aria-hidden="true"
       >
         <style>
@@ -51,24 +49,24 @@ export const renderIssuePreview = (
         ${
           showRepoName
             ? `
-<text class="repo-title" x="0" y="22">${repo.owner} <tspan class="slash">/</tspan> <tspan class="repo-name">${repo.name}</tspan></text>
+<text class="repo-title" x="0" y="12">${repo.owner} <tspan class="slash">/</tspan> <tspan class="repo-name">${repo.name}</tspan></text>
 `
             : ""
         }
             <path fill="${
               darkMode ? "#3fba4f" : "#197f36"
             }" d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" transform="translate(0, ${
-  showRepoName ? "45" : "0"
+  showRepoName ? "34" : "12"
 })"></path>
             <path fill="${
               darkMode ? "#3fba4f" : "#197f36"
             }" d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z" transform="translate(0, ${
-  showRepoName ? "45" : "0"
+  showRepoName ? "34" : "12"
 })"></path>
-        <text class="issue-title" x="25" y="${showRepoName ? "57" : "17"}">${
+        <text class="issue-title" x="25" y="${showRepoName ? "47" : "27"}">${
   issue.title
 }</text>
-        <text class="desc" x="25" y="${showRepoName ? "75" : "38"}">#${
+        <text class="desc" x="25" y="${showRepoName ? "65" : "48"}">#${
   issue.number
 } opened on ${new Date(issue.createdAt).toDateString()} by ${
   issue.author
