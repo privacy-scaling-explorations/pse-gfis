@@ -5,6 +5,8 @@ export const PSE_ENTITIES: Entity[] = [
   { org: "Unirep" },
   { org: "Rate-Limiting-Nullifier" },
   { org: "privacy-scaling-explorations" },
+  { org: "bandada-infra" },
+  { org: "anon-aadhaar" },
   // { repo: { owner: "privacy-scaling-explorations", repo: "maci" } },
   // { repo: { owner: "semaphore-protocol", repo: "semaphore" } },
   // Add more orgs and repos here
