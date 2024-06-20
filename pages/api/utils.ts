@@ -8,6 +8,7 @@ const GOOD_FIRST_ISSUE_LABELS = [
   "good first issue",
   "good-first-issue",
   "good first issues",
+  "good-first-issues",
   // Add more labels here
 ];
 

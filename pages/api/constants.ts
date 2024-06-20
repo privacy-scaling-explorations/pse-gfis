@@ -2,12 +2,11 @@ import { Entity } from "./types";
 
 export const PSE_ENTITIES: Entity[] = [
   { org: "semaphore-protocol" },
-  // { org: "Unirep" },
   { org: "Rate-Limiting-Nullifier" },
   { org: "privacy-scaling-explorations" },
   { org: "bandada-infra" },
-  { org: "anon-aadhaar" }
-  // { repo: { owner: "privacy-scaling-explorations", repo: "maci" } },
+  { org: "anon-aadhaar" },
+  { org: "summa-dev"},
   // { repo: { owner: "semaphore-protocol", repo: "semaphore" } },
   // Add more orgs and repos here
 ];
