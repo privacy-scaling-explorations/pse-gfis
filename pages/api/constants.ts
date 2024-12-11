@@ -8,6 +8,7 @@ export const PSE_ENTITIES: Entity[] = [
   { org: "anon-aadhaar" },
   { org: "summa-dev"},
   { org: "zkmopro"},
+  { org: "tlsnotary" },
   // { repo: { owner: "semaphore-protocol", repo: "semaphore" } },
   // Add more orgs and repos here
 ];
