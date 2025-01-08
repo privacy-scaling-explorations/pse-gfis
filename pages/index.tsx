@@ -91,7 +91,7 @@ const Home = () => {
             }
             return null;
           }).filter(repo => repo !== null).map((repo, index) => {
-            if (repo.count === 0) {
+            if (repo?.count === 0) {
               return null;
             }
 
