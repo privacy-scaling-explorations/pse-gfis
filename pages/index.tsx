@@ -4,6 +4,7 @@ import Image from "next/image";
 import RepoPreview from "../components/RepoPreview";
 import IssuePreview from "../components/IssuePreview";
 import pseLogo from "../public/pse-logo.png";
+import SearchBar from "@/components/SearchBar";
 
 type RepoData = {
   name: string;
@@ -25,6 +26,12 @@ const Home = () => {
   const [data, setData] = useState<RepoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    setQuery(e.target.value);
+  };
 
   useEffect(() => {
     // Fetch data from the API endpoint
@@ -34,6 +41,7 @@ const Home = () => {
         if (result.error) {
           throw new Error(result.error);
         }
+
         setData(result);
         setLoading(false);
       })
@@ -67,14 +75,26 @@ const Home = () => {
           </h2>
         </div>
       </div>
+      <SearchBar handleSearch = {handleSearch} />
       {loading ? (
         <p>Loading...</p>
       ) : (
         <div>
-          {data.map((repo, index) => {
-            if (repo.count === 0) {
+          {data.map(repo => {
+            const filteredIssues = repo.issues.filter(issue => issue.title.toLowerCase().includes(query.toLowerCase()));
+      
+            if (filteredIssues.length > 0) {
+              return {
+                ...repo,
+                issues: filteredIssues,
+              }
+            }
+            return null;
+          }).filter(repo => repo !== null).map((repo, index) => {
+            if (repo?.count === 0) {
               return null;
             }
+
             return (
               <div key={index} className="pb-4">
                 <RepoPreview repo={repo} />
